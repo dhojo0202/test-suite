@@ -17,7 +17,10 @@ public class DashboardTest {
     @BeforeAll
     static void launchBrowser() {
         playwright = Playwright.create();
-        browser = playwright.chromium().launch();
+        browser = playwright.chromium().launch(
+                new BrowserType.LaunchOptions()
+                        .setHeadless(false)
+                        .setSlowMo(1000));
     }
 
     @AfterAll
@@ -74,10 +77,21 @@ public class DashboardTest {
     @Test
     @Order(5)
     @DisplayName("タスクを追加できる")
-    void addtask(){
+    void addtask() {
         page.navigate("http://localhost:8080");
         page.getByPlaceholder("タスクを入力...").fill("テストタスク");
         page.locator(".add-form button[type='submit']").first().click();
         assertTrue(page.locator(".task-list").textContent().contains("テストタスク"));
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("タスクを削除できる")
+    void deleteTask() {
+        page.navigate("http://localhost:8080");
+        int beforeCount = page.locator(".task-item").count();
+        page.locator(".delete-btn").first().click();
+        int afterCount = page.locator(".task-item").count();
+        assertTrue(afterCount < beforeCount);
     }
 }
